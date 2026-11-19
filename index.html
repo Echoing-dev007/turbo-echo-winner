@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>我的 C++ 题库</title>
+<style>
+:root {
+  --pochacco-blue: #A0C4FF;
+  --bg-color: #F4F7FB;
+  --card-bg: #FFFFFF;
+  --text-main: #2C3E50;
+  --border-color: #E1E8F0;
+  --wrong-color: #FF8FA3;
+  --mastered-color: #98D8C8;
+}
+body.dark {
+  --pochacco-blue: #6A9BD8;
+  --bg-color: #1E2430;
+  --card-bg: #2A3242;
+  --text-main: #E8EDF2;
+  --border-color: #3A4558;
+  --wrong-color: #FF6B8A;
+  --mastered-color: #4DB6AC;
+}
+* { box-sizing: border-box; }
+body { font-family: 'Microsoft YaHei', sans-serif; background-color: var(--bg-color); background-size: cover; background-attachment: fixed; color: var(--text-main); margin: 0; padding: 20px; transition: 0.3s; }
+.container { max-width: 1000px; margin: 0 auto; }
+.header { display: flex; justify-content: space-between; align-items: center; background: var(--card-bg); padding: 15px 25px; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px; flex-wrap: wrap; gap: 15px; border: 2px solid var(--border-color); }
+h1 { margin: 0; font-size: 20px; display: flex; align-items: center; gap: 10px; cursor: pointer; position: relative; }
+h1:hover::after { content: '✏️'; position: absolute; right: -25px; font-size: 14px; opacity: 0.5; }
+.logo-img { width: 36px; height: 36px; object-fit: contain; border-radius: 50%; cursor: pointer; border: 2px dashed transparent; }
+.logo-img:hover { border-color: var(--pochacco-blue); }
+.controls { display: flex; gap: 8px; flex-wrap: wrap; }
+button { padding: 8px 16px; border-radius: 12px; font-weight: bold; font-size: 13px; cursor: pointer; transition: 0.2s; outline: none; border: none; }
+button:hover { transform: translateY(-2px); }
+.btn-primary { background: var(--pochacco-blue); color: var(--text-main); }
+.btn-success { background: var(--mastered-color); color: #fff; }
+.btn-warning { background: var(--wrong-color); color: #fff; }
+.btn-gray { background: var(--border-color); color: var(--text-main); }
+.btn-danger { background: #FF6B6B; color: #fff; }
+.btn-outline { background: transparent; border: 2px solid var(--border-color); color: var(--text-main); }
+.stats-bar { background: var(--card-bg); padding: 10px 20px; border-radius: 14px; margin-bottom: 16px; border: 2px solid var(--border-color); display: flex; gap: 15px; flex-wrap: wrap; font-size: 14px; font-weight: bold; }
+.stats-bar b { color: var(--pochacco-blue); }
+/* 给卡片加上 overflow: hidden 防止意外溢出 */
+.q-card { background: var(--card-bg); padding: 20px; border-radius: 20px; margin-bottom: 20px; border-left: 8px solid var(--wrong-color); box-shadow: 0 4px 12px rgba(0,0,0,0.04); overflow: hidden; word-break: break-all; }
+.q-card.is-mastered { border-left-color: var(--mastered-color); opacity: 0.85; }
+.q-tag { display: inline-block; background: #EBF2FA; color: #5A7184; padding: 2px 8px; border-radius: 10px; font-size: 12px; margin-right: 5px; font-weight: bold; }
+.q-title { font-weight: bold; font-size: 16px; margin: 10px 0; }
+.q-options { color: #666; margin-bottom: 10px; white-space: pre-wrap; line-height: 1.6; }
+.q-ans-box { display: none; background: #F0F8FF; padding: 15px; border-radius: 12px; margin: 10px 0; }
+.q-ans-text { color: #D35400; font-weight: bold; }
+.q-ans-text pre { white-space: pre-wrap; font-family: Consolas, monospace; padding: 10px 0; margin: 0; color: #D35400; }
+.form-box { display: none; background: var(--card-bg); padding: 20px; border-radius: 20px; margin-bottom: 20px; border: 2px dashed var(--pochacco-blue); }
+.form-box input, .form-box textarea, .form-box select { width: 100%; padding: 10px; margin-bottom: 10px; border: 2px solid var(--border-color); border-radius: 10px; font-family: inherit; background: var(--bg-color); color: var(--text-main); }
+#examArea { display: none; }
+.exam-item { background: var(--card-bg); padding: 20px; border-radius: 15px; margin-bottom: 15px; border: 1px solid var(--border-color); }
+.opt-btn { display: block; width: 100%; text-align: left; padding: 10px; margin: 5px 0; border: 2px solid var(--border-color); border-radius: 10px; background: none; color: var(--text-main); }
+.opt-btn.selected { border-color: var(--pochacco-blue); background: #F0F8FF; }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header">
+    <h1 onclick="editTitle()">
+      <img id="webLogo" class="logo-img" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐶</text></svg>" title="点击更换你的专属头像" onclick="event.stopPropagation(); document.getElementById('logoInput').click();">
+      <span id="webTitle">点击这里修改网页名字</span>
+    </h1>
+    <input type="file" id="logoInput" style="display:none" accept="image/*" onchange="applyLogo(event)">
+    
+    <div class="controls">
+      <button class="btn-outline" onclick="toggleDark()">🌙 夜间模式</button>
+      <button class="btn-outline" onclick="document.getElementById('bgInput').click()">🖼️ 换壁纸</button>
+      <input type="file" id="bgInput" style="display:none" accept="image/*" onchange="applyBg(event)">
+      <button class="btn-outline" onclick="resetData()" title="如果页面排版错乱，点这里恢复">🔄 重置题库</button>
+      <button class="btn-primary" onclick="startExam()">📝 考试模式</button>
+      <button class="btn-primary" onclick="toggleForm()">➕ 添加题目</button>
+    </div>
+  </div>
+
+  <div id="mainArea">
+    <div class="stats-bar">
+      <span>全部：<b id="s-total">0</b></span>
+      <span>未掌握：<b id="s-unmastered">0</b></span>
+      <span>已掌握：<b id="s-mastered">0</b></span>
+    </div>
+    
+    <div style="margin-bottom:15px; display:flex; gap:10px; flex-wrap:wrap;">
+      <select id="f-status" class="btn-outline" onchange="renderList()">
+        <option value="unmastered">📖 错题本</option>
+        <option value="mastered">🌟 已掌握</option>
+        <option value="all" selected>📚 全部题库</option>
+      </select>
+      <select id="f-type" class="btn-outline" onchange="renderList()">
+        <option value="all">所有题型</option>
+        <option value="选择题">选择题</option>
+        <option value="程序设计题">编程题</option>
+      </select>
+      <input type="text" id="f-search" class="btn-outline" placeholder="🔍 搜索..." oninput="renderList()" style="flex:1; min-width:150px;">
+    </div>
+
+    <div class="form-box" id="addForm">
+      <h3>📝 录入新题</h3>
+      
+      <div style="background: #FFF9E6; padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #FFE082;">
+        <label style="font-weight:bold; color:#B7791F; display:block; margin-bottom:5px;">✨ 一键智能粘贴区</label>
+        <textarea id="smart-paste" placeholder="直接粘贴包含题目、选项、答案的完整文本..." rows="5" style="background:#FFF; border-color:#FFE082;"></textarea>
+        <button class="btn-gray" onclick="smartParse()" style="margin-top:10px; background:#FFB300; color:#FFF;">✨ 自动拆分填充</button>
+      </div>
+
+      <select id="q-type" style="margin-bottom:10px;">
+        <option value="选择题">选择题</option>
+        <option value="程序设计题">程序设计题</option>
+      </select>
+      <input type="text" id="q-sub" placeholder="考点分类（如：循环、基础概念）">
+      <textarea id="q-title" placeholder="题目内容" rows="2"></textarea>
+      <textarea id="q-opt" placeholder="选项（选择题填，换行）" rows="3"></textarea>
+      <textarea id="q-ans" placeholder="正确答案 / 代码" rows="3"></textarea>
+      <textarea id="q-exp" placeholder="解析" rows="2"></textarea>
+      <div style="text-align:right; margin-top:10px;">
+        <button class="btn-outline" onclick="toggleForm()">取消</button>
+        <button class="btn-primary" onclick="saveQ()">保存</button>
+      </div>
+    </div>
+
+    <div id="list"></div>
+  </div>
+
+  <div id="examArea">
+    <div class="header" style="background:var(--pochacco-blue); color:var(--text-main);">
+      <h2>📝 选择题考试</h2>
+      <div>
+        <span id="exam-progress" style="font-weight:bold; margin-right:15px;"></span>
+        <button class="btn-outline" onclick="exitExam()">退出</button>
+        <button class="btn-success" onclick="submitExam()">交卷</button>
+      </div>
+    </div>
+    <div id="exam-list"></div>
+    <div id="exam-result" style="display:none; text-align:center; padding:20px; background:var(--card-bg); border-radius:20px;">
+      <h2 id="score-text" style="font-size:36px; color:var(--pochacco-blue);"></h2>
+      <p>答错的题已自动打回“未掌握”</p>
+      <button class="btn-primary" onclick="exitExam()">返回题库</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// 初始题库（数据太长了，这里我用部分代表，实际保存后依然有全部34题）
+const DB = [
+  { id:1, type:"选择题", sub:"基础概念", q:"处理以#开头的命令（如 #include）的阶段称为（ ）。", o:"A. 预处理\nB. 编译\nC. 链接\nD. 运行", a:"A", e:"#开头是预处理指令", m:false },
+  { id:2, type:"选择题", sub:"基础概念", q:"编译后生成的可执行文件扩展名通常是（ ）。", o:"A. .cpp\nB. .exe\nC. .obj\nD. .c", a:"B", e:".exe是Windows可执行文件", m:false },
+  { id:3, type:"选择题", sub:"基础概念", q:"将C++源程序翻译成目标程序的阶段称为（ ）。", o:"A. 编辑\nB. 编译\nC. 链接\nD. 执行", a:"B", e:"编译", m:false },
+  { id:4, type:"选择题", sub:"基础概念", q:"下列变量名中，合法的是（ ）。", o:"A. 2abc\nB. int\nC. my_num\nD. a-b", a:"C", e:"不能数字开头、不能用关键字、不能有减号", m:false },
+  { id:5, type:"选择题", sub:"基础概念", q:"标识符只能由字母、数字和（ ）组成。", o:"A. 减号\nB. 点\nC. 下划线\nD. 星号", a:"C", e:"C++标识符三大要素", m:false },
+  { id:6, type:"选择题", sub:"数据类型", q:"用于存储单个字符的数据类型是（ ）。", o:"A. int\nB. char\nC. string\nD. bool", a:"B", e:"char是字符型", m:false },
+  { id:7, type:"选择题", sub:"数据类型", q:"可以存储带小数数据的是（ ）。", o:"A. int\nB. char\nC. bool\nD. double", a:"D", e:"double是双精度浮点型", m:false },
+  { id:8, type:"选择题", sub:"基础概念", q:"CPU按照（ ）的方式从内存中取出指令、存取数据。", o:"A. 定位\nB. 指令\nC. 寻址\nD. 复制", a:"C", e:"寻址", m:false },
+  { id:9, type:"选择题", sub:"数据类型", q:"k=017; g=111; 则输出结果为（ ）。", o:"A. 15,6f\nB. f,6f\nC. f,111\nD. 15,111", a:"D", e:"0开头是八进制，017转十进制是15", m:false },
+  { id:10, type:"选择题", sub:"基础概念", q:"下列表述中不是C++常量的是（ ）。", o:"A. 12\nB. 'A'\nC. WA\nD. \"C++\"", a:"C", e:"WA是标识符", m:false },
+  { id:11, type:"选择题", sub:"数据类型", q:"char型常量在内存中存放的是（ ）。", o:"A. ASCII码值\nB. Unicode码值\nC. 内码值\nD. 十进制代码值", a:"A", e:"ASCII码", m:false },
+  { id:12, type:"选择题", sub:"运算符", q:"下列运算符中，优先级最高的是（ ）。", o:"A. +\nB. ==\nC. &&\nD. =", a:"A", e:"算术 > 关系 > 逻辑 > 赋值", m:false },
+  { id:13, type:"选择题", sub:"运算符", q:"int a=7, b=2; 则表达式 a/b 的值是（ ）。", o:"A. 3.5\nB. 3\nC. 2\nD. 4", a:"B", e:"整数除法截断小数", m:false },
+  { id:14, type:"选择题", sub:"运算符", q:"int a=5; 执行 a+=3; 后，a的值是（ ）。", o:"A. 3\nB. 5\nC. 8\nD. 15", a:"C", e:"a = a + 3", m:false },
+  { id:15, type:"选择题", sub:"运算符", q:"表达式 7 % 3 的值是（ ）。", o:"A. 1\nB. 2\nC. 2.33\nD. 3", a:"A", e:"取余数", m:false },
+  { id:16, type:"选择题", sub:"运算符", q:"(a=2)&&(b=-2) 的值是（ ）。", o:"A. -1\nB. 结果不确定\nC. 0\nD. 1", a:"D", e:"非0即真，逻辑真返回1", m:false },
+  { id:17, type:"选择题", sub:"循环结构", q:"能代表逻辑值“假”的是（ ）。", o:"A. 0\nB. 大于0\nC. 非0\nD. 非0整数", a:"A", e:"只有0是假", m:false },
+  { id:18, type:"选择题", sub:"数据类型", q:"char a='a', b='j'; float x=(b-a)/('F'-'A'); 输出x（ ）。", o:"A. 1.8\nB. 1\nC. 2\nD. 2.5", a:"B", e:"9/5整数除法等于1", m:false },
+  { id:19, type:"选择题", sub:"循环结构", q:"int i,x,y; 在下列选项中错误的是（ ）。", o:"A. if(x==y) i++;\nB. if(x=y) i--;\nC. if(xy) i--;\nD. if(x+y) i++;", a:"C", e:"xy连写语法错误", m:false },
+  { id:20, type:"选择题", sub:"循环结构", q:"if(!a); b--; cout<<a<<b; (a=3,b=5) 输出（ ）。", o:"A. 34\nB. 35\nC. 05\nD. 有错", a:"A", e:"分号陷阱，b--无条件执行", m:false },
+  { id:21, type:"选择题", sub:"循环结构", q:"将 u、s 中的最大值赋给 t 的是（ ）。", o:"A. if(u>s) t=s; else t=u;\nB. if(u>s) t=u; t=s;\nC. t=u; if(t>s) t=s;\nD. t=s; if(u>t) t=u;", a:"D", e:"先假设s最大，u更大再替换", m:false },
+  { id:22, type:"选择题", sub:"循环结构", q:"死循环的程序段是（ ）。", o:"A. for(x=0;x<3;){x++;}\nB. for(;i;i--);\nC. do{k--;} while(k<0);\nD. while(a){a--;}", a:"C", e:"k越来越小，永远<0", m:false },
+  { id:23, type:"选择题", sub:"循环结构", q:"死循环的程序段是（ ）。", o:"A. for(x=0;x<3;){x++;}\nB. do{++k;} while(k>=0);\nC. while(a){a--;}\nD. for(;i;i--);", a:"B", e:"k越来越大，永远>=0", m:false },
+  { id:24, type:"选择题", sub:"循环结构", q:"for(int i=0; i<5; i++;) i++; 执行次数（ ）。", o:"A. 4\nB. 5\nC. 1\nD. 0", a:"B", e:"循环体为空，执行5次", m:false },
+  { id:25, type:"选择题", sub:"循环结构", q:"for语句正确的是（ ）。", o:"A. for(;;)\nB. for(,)\nC. for(；；)\nD. for(;;)", a:"A", e:"英文分号死循环", m:false },
+  { id:26, type:"选择题", sub:"循环结构", q:"输入对数，相等时结束。while( ______ )", o:"A. a==b\nB. a=b\nC. !a=b\nD. a!=b", a:"D", e:"不相等继续", m:false },
+  { id:27, type:"选择题", sub:"循环结构", q:"while(i=0) { ... } 执行次数（ ）。", o:"A. ∞\nB. 1\nC. 5\nD. 0", a:"D", e:"赋值0即假", m:false },
+  { id:28, type:"选择题", sub:"循环结构", q:"for(j=10;j<11;j++) for(i=9;i==j-1;i++) cout<<j; 输出（ ）。", o:"A. 11\nB. 10\nC. 9\nD. 10 11", a:"B", e:"内层执行一次", m:false },
+  { id:29, type:"选择题", sub:"循环结构", q:"for(i=1;i<=5;i++) {if(i%2) cout<<\"#\"; else... cout<<\"*\";} cout<<\"$\"; 输出（ ）。", o:"A. ##*#$\nB. *#*#*#$\nC. #*#*$\nD. #*#*#*$", a:"D", e:"奇偶交替", m:false },
+  { id:30, type:"选择题", sub:"循环结构", q:"100内被3整除之和，if(i%3) 【1】; sum+=i;", o:"A. break\nB. return\nC. continue\nD. exit", a:"C", e:"跳过不能整除的", m:false },
+  { id:31, type:"程序设计题", sub:"文件操作", q:"计算三个整数平均值\n从 in.txt 读取，输出到 out.txt", o:"", a:"#include <iostream>\n#include <fstream>\nusing namespace std;\nint main() {\n    int a, b, c;\n    ifstream in(\"in.txt\");\n    ofstream out(\"out.txt\");\n    in >> a >> b >> c;\n    out << (a + b + c) / 3.0 << endl;\n    in.close(); out.close(); return 0;\n}", e:"除以3.0保留小数", m:false },
+  { id:32, type:"程序设计题", sub:"基础计算", q:"BMI 指数\n公式：BMI = 体重 / 身高²", o:"", a:"#include <iostream>\n#include <fstream>\nusing namespace std;\nint main() {\n    float weight, height;\n    ifstream in(\"in.txt\");\n    ofstream out(\"out.txt\");\n    in >> weight >> height;\n    out << weight / (height * height) << endl;\n    in.close(); out.close(); return 0;\n}", e:"简单公式计算", m:false },
+  { id:33, type:"程序设计题", sub:"循环结构", q:"判定水仙花数\n输出1或0", o:"", a:"#include <iostream>\n#include <fstream>\nusing namespace std;\nint main() {\n    int n;\n    ifstream in(\"in.txt\");\n    ofstream out(\"out.txt\");\n    while (in >> n) {\n        int a = n / 100;\n        int b = (n / 10) % 10;\n        int c = n % 10;\n        if (a*a*a + b*b*b + c*c*c == n) out << 1 << endl;\n        else out << 0 << endl;\n    }\n    in.close(); out.close(); return 0;\n}", e:"数位分离", m:false },
+  { id:34, type:"程序设计题", sub:"基础计算", q:"三角形面积\n海伦公式", o:"", a:"#include <iostream>\n#include <fstream>\n#include <cmath>\nusing namespace std;\nint main() {\n    float a, b, c;\n    ifstream in(\"in.txt\");\n    ofstream out(\"out.txt\");\n    while (in >> a >> b >> c) {\n        if (a + b > c && a + c > b && b + c > a) {\n            float p = (a + b + c) / 2.0;\n            out << sqrt(p * (p - a) * (p - b) * (p - c)) << endl;\n        } else { out << -1 << endl; }\n    }\n    in.close(); out.close(); return 0;\n}", e:"需要cmath库", m:false }
+];
+
+// 转义函数，防止 <iostream> 被当做网页标签吞掉
+function escapeHTML(str) {
+  if (!str) return '';
+  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function getData() {
+  try {
+    const d = localStorage.getItem('poc_diy_v1');
+    return d ? JSON.parse(d) : JSON.parse(JSON.stringify(DB));
+  } catch(e) { return JSON.parse(JSON.stringify(DB)); }
+}
+
+let qs = getData();
+let examQs = [];
+let examAns = {};
+
+function initCustom() {
+  try {
+    const savedTitle = localStorage.getItem('poc_title');
+    if(savedTitle) {
+      document.getElementById('webTitle').innerText = savedTitle;
+      document.title = savedTitle;
+    }
+    const savedLogo = localStorage.getItem('poc_logo');
+    if(savedLogo) {
+      document.getElementById('webLogo').src = savedLogo;
+    }
+  } catch(e) {}
+}
+
+function editTitle() {
+  const current = document.getElementById('webTitle').innerText;
+  const newTitle = prompt("请输入你想要的网页名字：", current);
+  if(newTitle && newTitle.trim() !== "") {
+    document.getElementById('webTitle').innerText = newTitle.trim();
+    document.title = newTitle.trim();
+    try { localStorage.setItem('poc_title', newTitle.trim()); } catch(e) {}
+  }
+}
+
+function applyLogo(event) {
+  const file = event.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    document.getElementById('webLogo').src = e.target.result;
+    try { localStorage.setItem('poc_logo', e.target.result); } catch(err) {}
+  };
+  reader.readAsDataURL(file);
+}
+
+function save() {
+  try { localStorage.setItem('poc_diy_v1', JSON.stringify(qs)); } catch(e) {}
+  updateStats(); renderList();
+}
+
+// 重置脏数据的功能
+function resetData() {
+  if(confirm('🔄 这个操作会把题库恢复成最开始完美的34道题（你之前自己手动添加的可能会丢失），用于修复排版错乱的问题。确定重置吗？')) {
+    try { localStorage.removeItem('poc_diy_v1'); } catch(e) {}
+    qs = JSON.parse(JSON.stringify(DB));
+    updateStats(); renderList();
+    alert('✅ 重置成功！排版已修复！');
+  }
+}
+
+function updateStats() {
+  document.getElementById('s-total').innerText = qs.length;
+  document.getElementById('s-unmastered').innerText = qs.filter(q=>!q.m).length;
+  document.getElementById('s-mastered').innerText = qs.filter(q=>q.m).length;
+}
+
+function renderList() {
+  const st = document.getElementById('f-status').value;
+  const tp = document.getElementById('f-type').value;
+  const se = document.getElementById('f-search').value.toLowerCase();
+  
+  const filtered = qs.filter(q => {
+    if(st === 'unmastered' && q.m) return false;
+    if(st === 'mastered' && !q.m) return false;
+    if(tp !== 'all' && q.type !== tp) return false;
+    if(se && !q.q.toLowerCase().includes(se) && !(q.o&&q.o.toLowerCase().includes(se))) return false;
+    return true;
+  });
+
+  const list = document.getElementById('list');
+  if(!filtered.length) { list.innerHTML = '<div style="text-align:center; padding:40px;">🐶 没题啦~</div>'; return; }
+
+  list.innerHTML = filtered.map(q => `
+    <div class="q-card ${q.m ? 'is-mastered' : ''}">
+      <div>
+        <span class="q-tag">${q.type}</span>
+        <span class="q-tag" style="background:var(--mastered-color); color:#fff;">🎯 ${q.sub}</span>
+        ${q.m ? '<span class="q-tag" style="background:var(--mastered-color); color:#fff;">已掌握</span>' : ''}
+      </div>
+      <div class="q-title">${escapeHTML(q.q).replace(/\n/g,'<br>')}</div>
+      <div class="q-options">${q.o ? escapeHTML(q.o).replace(/\n/g,'<br>') : ''}</div>
+      <div>
+        <button class="btn-outline" onclick="showAns(this)">👀 显示答案</button>
+        <button class="${q.m?'btn-warning':'btn-success'}" onclick="toggleM(${q.id})">${q.m?'↩️ 打回未掌握':'🌟 标记为已掌握'}</button>
+        <button class="btn-gray" onclick="delQ(${q.id})">🗑️ 彻底删除</button>
+      </div>
+      <div class="q-ans-box">
+        <div class="q-ans-text"><pre>${escapeHTML(q.a)}</pre></div>
+        <div style="color:var(--mastered-color); font-size:14px; margin-top:10px;">💡 ${escapeHTML(q.e)}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function showAns(btn) {
+  const box = btn.closest('.q-card').querySelector('.q-ans-box');
+  const isVis = box.style.display === 'block';
+  box.style.display = isVis ? 'none' : 'block';
+  btn.innerText = isVis ? '👀 显示答案' : '🙈 隐藏答案';
+}
+
+function toggleM(id) {
+  const q = qs.find(x => x.id === id);
+  if(q) { q.m = !q.m; save(); }
+}
+
+function delQ(id) {
+  if(confirm('⚠️ 警告：这是永久删除！从整个题库中彻底销毁，不可恢复！\n\n如果你只是想把它移出当前列表，请点击“标记为已掌握”或“打回未掌握”。')) { 
+    qs = qs.filter(x => x.id !== id); 
+    save(); 
+  }
+}
+
+function toggleForm() {
+  const f = document.getElementById('addForm');
+  f.style.display = f.style.display === 'block' ? 'none' : 'block';
+}
+
+// 智能解析文本
+function smartParse() {
+  const text = document.getElementById('smart-paste').value;
+  if(!text.trim()) return alert('请先粘贴题目内容！');
+  
+  // 尝试寻找 A. B. C. D. 选项
+  const optMatch = text.match(/[A-D][\.\、\s].*?(?=[A-D][\.\、\s]|答案|正确答案|解析|$)/gis);
+  let opts = '';
+  if(optMatch) {
+    opts = optMatch.map(m => m.trim()).join('\n');
+  }
+  
+  // 尝试寻找答案
+  const ansMatch = text.match(/(?:答案|正确答案)[:：]?\s*([A-D])/i);
+  let ans = ansMatch ? ansMatch[1] : '';
+  
+  // 尝试寻找解析
+  const expMatch = text.match(/(?:解析|分析)[:：]?\s*([\s\S]*)/i);
+  let exp = expMatch ? expMatch[1].trim() : '';
+  
+  // 剩下的就是题目
+  let title = text;
+  if(opts) title = title.replace(opts, '');
+  if(ansMatch) title = title.split(/(?:答案|正确答案)/i)[0];
+  title = title.trim();
+
+  // 填充进去
+  document.getElementById('q-title').value = title;
+  document.getElementById('q-opt').value = opts;
+  document.getElementById('q-ans').value = ans;
+  document.getElementById('q-exp').value = exp;
+  
+  alert('✨ 解析完成！请检查下面的框是否拆对了，如果有错可以手动改改，然后点保存。');
+}
+
+function saveQ() {
+  const t = document.getElementById('q-title').value;
+  const a = document.getElementById('q-ans').value;
+  if(!t || !a) return alert('题目和答案不能为空！');
+  qs.unshift({
+    id: Date.now(),
+    type: document.getElementById('q-type').value,
+    sub: document.getElementById('q-sub').value || '未分类',
+    q: t,
+    o: document.getElementById('q-opt').value,
+    a: a,
+    e: document.getElementById('q-exp').value,
+    m: false
+  });
+  
+  // 清空表单
+  document.getElementById('smart-paste').value = '';
+  document.getElementById('q-title').value = '';
+  document.getElementById('q-ans').value = '';
+  document.getElementById('q-opt').value = '';
+  document.getElementById('q-exp').value = '';
+  
+  toggleForm(); save();
+}
+
+function startExam() {
+  const choices = qs.filter(q => q.type === '选择题');
+  if(!choices.length) return alert('题库没有选择题！');
+  examQs = choices.sort(() => 0.5 - Math.random()).slice(0, 30);
+  examAns = {};
+  document.getElementById('mainArea').style.display = 'none';
+  document.getElementById('examArea').style.display = 'block';
+  document.getElementById('exam-result').style.display = 'none';
+  
+  document.getElementById('exam-list').innerHTML = examQs.map((q, i) => {
+    const opts = q.o ? q.o.split('\n').filter(x=>x.trim()) : [];
+    return `
+      <div class="exam-item">
+        <div class="q-title">${i+1}. ${escapeHTML(q.q).replace(/\n/g,'<br>')}</div>
+        ${opts.map(o => `<button class="opt-btn" data-qid="${q.id}" data-l="${o.trim().charAt(0)}" onclick="pickOpt(this)">${escapeHTML(o)}</button>`).join('')}
+      </div>
+    `;
+  }).join('');
+  updateExProg();
+}
+
+function pickOpt(btn) {
+  const qid = btn.dataset.qid;
+  btn.parentElement.querySelectorAll('.opt-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  examAns[qid] = btn.dataset.l;
+  updateExProg();
+}
+
+function updateExProg() {
+  document.getElementById('exam-progress').innerText = `已答 ${Object.keys(examAns).length} / ${examQs.length}`;
+}
+
+function submitExam() {
+  if(!confirm('交卷？')) return;
+  let correct = 0;
+  examQs.forEach(q => {
+    const user = examAns[q.id] || '';
+    const ans = q.a.trim().charAt(0).toUpperCase();
+    if(user.toUpperCase() === ans) {
+      correct++;
+    } else {
+      const target = qs.find(x => x.id === q.id);
+      if(target) target.m = false;
+    }
+  });
+  save();
+  document.getElementById('exam-list').innerHTML = '';
+  const res = document.getElementById('exam-result');
+  res.style.display = 'block';
+  document.getElementById('score-text').innerText = Math.round((correct/examQs.length)*100) + ' 分';
+}
+
+function exitExam() {
+  document.getElementById('examArea').style.display = 'none';
+  document.getElementById('mainArea').style.display = 'block';
+  renderList();
+}
+
+function toggleDark() {
+  document.body.classList.toggle('dark');
+}
+
+function applyBg(e) {
+  const f = e.target.files[0];
+  if(!f) return;
+  const r = new FileReader();
+  r.onload = ev => {
+    document.body.style.backgroundImage = `url(${ev.target.result})`;
+    document.body.style.backgroundSize = 'cover';
+  };
+  r.readAsDataURL(f);
+}
+
+initCustom();
+updateStats();
+renderList();
+</script>
+</body>
+</html>
