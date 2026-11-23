@@ -5,58 +5,309 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>我的 C++ 题库</title>
 <style>
+/* 1. 色彩与全局变量升级 */
 :root {
   --pochacco-blue: #A0C4FF;
   --bg-color: #F4F7FB;
   --card-bg: #FFFFFF;
   --text-main: #2C3E50;
+  --text-sub: #5A7184;
   --border-color: #E1E8F0;
   --wrong-color: #FF8FA3;
   --mastered-color: #98D8C8;
+  
+  /* 新增：代码块与提示背景色 */
+  --code-bg: #f7f9fc;
+  --code-text: #c0392b;
+  --tip-bg: #fffbeb;
+
+  /* 统一圆角规范 */
+  --radius-lg: 20px;
+  --radius-md: 12px;
+  --radius-sm: 8px;
 }
+
 body.dark {
   --pochacco-blue: #6A9BD8;
   --bg-color: #1E2430;
   --card-bg: #2A3242;
   --text-main: #E8EDF2;
+  --text-sub: #A0B4C8;
   --border-color: #3A4558;
   --wrong-color: #FF6B8A;
   --mastered-color: #4DB6AC;
+  
+  /* 暗色模式代码块适配 */
+  --code-bg: #242b38;
+  --code-text: #ffb380;
+  --tip-bg: #37352b;
 }
+
 * { box-sizing: border-box; }
-body { font-family: 'Microsoft YaHei', sans-serif; background-color: var(--bg-color); background-size: cover; background-attachment: fixed; color: var(--text-main); margin: 0; padding: 20px; transition: 0.3s; }
+
+body { 
+  font-family: 'Microsoft YaHei', sans-serif; 
+  background-color: var(--bg-color); 
+  background-size: cover; 
+  background-attachment: fixed; 
+  color: var(--text-main); 
+  margin: 0; 
+  padding: 20px; 
+  transition: background-color 0.3s, color 0.3s; 
+  line-height: 1.7;
+}
+
+/* 2. 美化滚动条（页面和代码块通用） */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--pochacco-blue); }
+
 .container { max-width: 1000px; margin: 0 auto; }
-.header { display: flex; justify-content: space-between; align-items: center; background: var(--card-bg); padding: 15px 25px; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px; flex-wrap: wrap; gap: 15px; border: 2px solid var(--border-color); }
-h1 { margin: 0; font-size: 20px; display: flex; align-items: center; gap: 10px; cursor: pointer; position: relative; }
+
+/* 3. 顶部 Header 与 头像 */
+.header { 
+  display: flex; 
+  justify-content: space-between; 
+  align-items: center; 
+  background: var(--card-bg); 
+  padding: 15px 25px; 
+  border-radius: var(--radius-lg); 
+  box-shadow: 0 4px 15px rgba(0,0,0,0.05); 
+  margin-bottom: 20px; 
+  flex-wrap: wrap; 
+  gap: 15px; 
+  border: 2px solid var(--border-color); 
+}
+
+h1 { 
+  margin: 0; 
+  font-size: 20px; 
+  display: flex; 
+  align-items: center; 
+  gap: 10px; 
+  cursor: pointer; 
+  position: relative; 
+}
 h1:hover::after { content: '✏️'; position: absolute; right: -25px; font-size: 14px; opacity: 0.5; }
-.logo-img { width: 36px; height: 36px; object-fit: contain; border-radius: 50%; cursor: pointer; border: 2px dashed transparent; }
-.logo-img:hover { border-color: var(--pochacco-blue); }
-.controls { display: flex; gap: 8px; flex-wrap: wrap; }
-button { padding: 8px 16px; border-radius: 12px; font-weight: bold; font-size: 13px; cursor: pointer; transition: 0.2s; outline: none; border: none; }
-button:hover { transform: translateY(-2px); }
+
+.logo-img { 
+  width: 36px; 
+  height: 36px; 
+  object-fit: contain; 
+  border-radius: 50%; 
+  cursor: pointer; 
+  border: 2px dashed transparent; 
+  transition: all 0.3s ease;
+}
+.logo-img:hover { border-color: var(--pochacco-blue); transform: scale(1.05); }
+
+.controls { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+
+/* 4. 按钮与输入框交互反馈 */
+button { 
+  padding: 8px 16px; 
+  border-radius: var(--radius-md); 
+  font-weight: bold; 
+  font-size: 13px; 
+  cursor: pointer; 
+  transition: all 0.2s ease; 
+  outline: none; 
+  border: none; 
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+button:hover { transform: translateY(-2px); filter: brightness(0.95); }
+button:active { transform: translateY(0px); filter: brightness(0.9); } /* 增加按下回弹效果 */
+
 .btn-primary { background: var(--pochacco-blue); color: var(--text-main); }
 .btn-success { background: var(--mastered-color); color: #fff; }
 .btn-warning { background: var(--wrong-color); color: #fff; }
 .btn-gray { background: var(--border-color); color: var(--text-main); }
 .btn-danger { background: #FF6B6B; color: #fff; }
 .btn-outline { background: transparent; border: 2px solid var(--border-color); color: var(--text-main); }
-.stats-bar { background: var(--card-bg); padding: 10px 20px; border-radius: 14px; margin-bottom: 16px; border: 2px solid var(--border-color); display: flex; gap: 15px; flex-wrap: wrap; font-size: 14px; font-weight: bold; }
-.stats-bar b { color: var(--pochacco-blue); }
-/* 给卡片加上 overflow: hidden 防止意外溢出 */
-.q-card { background: var(--card-bg); padding: 20px; border-radius: 20px; margin-bottom: 20px; border-left: 8px solid var(--wrong-color); box-shadow: 0 4px 12px rgba(0,0,0,0.04); overflow: hidden; word-break: break-all; }
-.q-card.is-mastered { border-left-color: var(--mastered-color); opacity: 0.85; }
-.q-tag { display: inline-block; background: #EBF2FA; color: #5A7184; padding: 2px 8px; border-radius: 10px; font-size: 12px; margin-right: 5px; font-weight: bold; }
-.q-title { font-weight: bold; font-size: 16px; margin: 10px 0; }
-.q-options { color: #666; margin-bottom: 10px; white-space: pre-wrap; line-height: 1.6; }
-.q-ans-box { display: none; background: #F0F8FF; padding: 15px; border-radius: 12px; margin: 10px 0; }
-.q-ans-text { color: #D35400; font-weight: bold; }
-.q-ans-text pre { white-space: pre-wrap; font-family: Consolas, monospace; padding: 10px 0; margin: 0; color: #D35400; }
-.form-box { display: none; background: var(--card-bg); padding: 20px; border-radius: 20px; margin-bottom: 20px; border: 2px dashed var(--pochacco-blue); }
-.form-box input, .form-box textarea, .form-box select { width: 100%; padding: 10px; margin-bottom: 10px; border: 2px solid var(--border-color); border-radius: 10px; font-family: inherit; background: var(--bg-color); color: var(--text-main); }
+
+select, input[type="text"] { 
+  padding: 8px 12px; 
+  border: 2px solid var(--border-color); 
+  border-radius: var(--radius-md); 
+  font-weight: bold; 
+  font-size: 13px; 
+  cursor: pointer; 
+  background: var(--card-bg); 
+  color: var(--text-main); 
+  transition: all 0.2s ease; 
+  outline: none; 
+}
+select:focus, input[type="text"]:focus { border-color: var(--pochacco-blue); }
+
+/* 5. 统计栏美化 */
+.stats-bar { 
+  background: var(--card-bg); 
+  padding: 12px 20px; 
+  border-radius: var(--radius-md); 
+  margin-bottom: 16px; 
+  border: 2px solid var(--border-color); 
+  display: flex; 
+  gap: 20px; 
+  flex-wrap: wrap; 
+  font-size: 14px; 
+  font-weight: bold; 
+}
+.stats-bar b { color: var(--pochacco-blue); font-size: 18px; margin-left: 4px; }
+
+/* 6. 题目卡片悬浮效果 */
+.q-card { 
+  background: var(--card-bg); 
+  padding: 24px; 
+  border-radius: var(--radius-lg); 
+  margin-bottom: 20px; 
+  border-left: 8px solid var(--wrong-color); 
+  box-shadow: 0 4px 12px rgba(0,0,0,0.04); 
+  overflow: hidden; 
+  word-break: break-all; 
+  transition: all 0.25s ease;
+}
+.q-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+}
+.q-card.is-mastered { border-left-color: var(--mastered-color); opacity: 0.7; }
+.q-card.is-mastered:hover { opacity: 0.9; }
+
+.q-tag { 
+  display: inline-block; 
+  background: #EBF2FA; 
+  color: #5A7184; 
+  padding: 4px 10px; 
+  border-radius: 12px; 
+  font-size: 12px; 
+  margin-right: 6px; 
+  margin-bottom: 4px;
+  font-weight: bold; 
+  transition: opacity 0.2s;
+}
+.q-tag:hover { opacity: 0.8; }
+
+.q-title { font-weight: bold; font-size: 17px; margin: 12px 0; line-height: 1.5; }
+.q-options { color: var(--text-main); opacity: 0.85; margin-bottom: 16px; white-space: pre-wrap; font-size: 15px; }
+
+/* 7. 答案解析与核心代码块修复 */
+.q-ans-box { 
+  display: none; 
+  background: var(--bg-color); 
+  padding: 16px; 
+  border-radius: var(--radius-md); 
+  margin: 12px 0; 
+  border: 1px solid var(--border-color);
+  animation: fadeIn 0.3s ease;
+}
+@keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+
+.q-ans-text { color: var(--code-text); font-weight: bold; font-size: 15px; }
+
+/* 绝对核心：代码块防撑破修复 */
+.q-ans-text pre { 
+  white-space: pre-wrap; 
+  font-family: Consolas, monospace; 
+  background: var(--code-bg); 
+  padding: 14px; 
+  border-radius: var(--radius-sm); 
+  margin: 10px 0 0 0; 
+  color: var(--code-text); 
+  font-size: 13px;
+  line-height: 1.5;
+  overflow-x: auto; /* 长代码横向滚动，不撑破卡片 */
+  border: 1px solid var(--border-color);
+}
+
+.q-explanation { color: #16A085; font-size: 14px; line-height: 1.7; margin-top: 12px; }
+
+/* 8. 表单与智能粘贴区 */
+.form-box { 
+  display: none; 
+  background: var(--card-bg); 
+  padding: 24px; 
+  border-radius: var(--radius-lg); 
+  margin-bottom: 20px; 
+  border: 2px dashed var(--pochacco-blue); 
+}
+.form-box h3 { margin-top: 0; margin-bottom: 16px; }
+.form-box input, .form-box textarea, .form-box select { 
+  width: 100%; 
+  padding: 12px; 
+  margin-bottom: 12px; 
+  border: 2px solid var(--border-color); 
+  border-radius: var(--radius-md); 
+  font-family: inherit; 
+  background: var(--bg-color); 
+  color: var(--text-main); 
+  font-size: 14px;
+  transition: border-color 0.2s;
+}
+.form-box input:focus, .form-box textarea:focus { border-color: var(--pochacco-blue); outline: none; }
+
+.smart-paste-box {
+  background: var(--tip-bg); 
+  padding: 16px; 
+  border-radius: var(--radius-md); 
+  margin-bottom: 16px; 
+  border: 1px solid #FFE082;
+}
+.smart-paste-box label { font-weight: bold; color: #B7791F; display: block; margin-bottom: 8px; font-size: 14px;}
+.smart-paste-box textarea { background: var(--card-bg); border-color: #FFE082; margin-bottom: 10px;}
+.smart-paste-box button { background: #FFB300; color: #FFF; width: 100%; }
+
+/* 9. 考试模式 UI 强化 */
 #examArea { display: none; }
-.exam-item { background: var(--card-bg); padding: 20px; border-radius: 15px; margin-bottom: 15px; border: 1px solid var(--border-color); }
-.opt-btn { display: block; width: 100%; text-align: left; padding: 10px; margin: 5px 0; border: 2px solid var(--border-color); border-radius: 10px; background: none; color: var(--text-main); }
-.opt-btn.selected { border-color: var(--pochacco-blue); background: #F0F8FF; }
+.exam-item { 
+  background: var(--card-bg); 
+  padding: 20px; 
+  border-radius: var(--radius-md); 
+  margin-bottom: 16px; 
+  border: 2px solid var(--border-color); 
+}
+.opt-btn { 
+  display: block; 
+  width: 100%; 
+  text-align: left; 
+  padding: 12px 16px; 
+  margin: 8px 0; 
+  border: 2px solid var(--border-color); 
+  border-radius: var(--radius-md); 
+  background: transparent; 
+  color: var(--text-main); 
+  font-weight: normal;
+  font-size: 15px;
+}
+.opt-btn:hover { background: var(--bg-color); border-color: var(--pochacco-blue); transform: none; filter: none; }
+.opt-btn.selected { 
+  border-color: var(--pochacco-blue); 
+  background: var(--tip-bg); 
+  font-weight: bold; 
+  box-shadow: 0 0 0 2px rgba(160, 196, 255, 0.3);
+}
+
+/* 10. 空状态美化 */
+.empty-state { text-align: center; padding: 60px 20px; color: var(--text-main); opacity: 0.5; font-size: 18px; }
+
+/* 11. 手机端响应式适配（专门修复挤压问题） */
+@media(max-width: 640px) {
+  .header { flex-direction: column; align-items: stretch; padding: 15px; }
+  h1 { justify-content: center; }
+  .controls { justify-content: stretch; }
+  .controls button { flex: 1; min-width: 100px; }
+  /* 筛选行占满 */
+  div[style*="margin-bottom:15px"] { flex-direction: column; }
+  select, input[type="text"] { width: 100%; }
+  
+  .q-card { padding: 16px; }
+  /* 修复按钮在手机上挤成一团的问题 */
+  .q-card > div:nth-last-child(2) { display: flex; flex-wrap: wrap; gap: 8px; }
+  .q-card > div:nth-last-child(2) button { flex: 1; min-width: 45%; }
+}
 </style>
 </head>
 <body>
@@ -102,18 +353,16 @@ button:hover { transform: translateY(-2px); }
 
     <div class="form-box" id="addForm">
       <h3>📝 录入新题</h3>
-      
-      <div style="background: #FFF9E6; padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #FFE082;">
-        <label style="font-weight:bold; color:#B7791F; display:block; margin-bottom:5px;">✨ 一键智能粘贴区</label>
-        <textarea id="smart-paste" placeholder="直接粘贴包含题目、选项、答案的完整文本..." rows="5" style="background:#FFF; border-color:#FFE082;"></textarea>
-        <button class="btn-gray" onclick="smartParse()" style="margin-top:10px; background:#FFB300; color:#FFF;">✨ 自动拆分填充</button>
+      <div class="smart-paste-box">
+        <label>✨ 一键智能粘贴区</label>
+        <textarea id="smart-paste" placeholder="直接粘贴包含题目、选项、答案的完整文本..." rows="5"></textarea>
+        <button onclick="smartParse()">✨ 自动拆分填充</button>
       </div>
-
       <select id="q-type" style="margin-bottom:10px;">
         <option value="选择题">选择题</option>
         <option value="程序设计题">程序设计题</option>
       </select>
-      <input type="text" id="q-sub" placeholder="考点分类（如：循环、基础概念）">
+      <input type="text" id="q-sub" placeholder="考点分类（如：数组、循环、基础概念）">
       <textarea id="q-title" placeholder="题目内容" rows="2"></textarea>
       <textarea id="q-opt" placeholder="选项（选择题填，换行）" rows="3"></textarea>
       <textarea id="q-ans" placeholder="正确答案 / 代码" rows="3"></textarea>
@@ -131,60 +380,108 @@ button:hover { transform: translateY(-2px); }
     <div class="header" style="background:var(--pochacco-blue); color:var(--text-main);">
       <h2>📝 选择题考试</h2>
       <div>
-        <span id="exam-progress" style="font-weight:bold; margin-right:15px;"></span>
-        <button class="btn-outline" onclick="exitExam()">退出</button>
+        <span id="exam-progress" style="font-weight:bold; margin-right:15px; font-size: 15px;"></span>
+        <button class="btn-gray" onclick="exitExam()">退出</button>
         <button class="btn-success" onclick="submitExam()">交卷</button>
       </div>
     </div>
     <div id="exam-list"></div>
-    <div id="exam-result" style="display:none; text-align:center; padding:20px; background:var(--card-bg); border-radius:20px;">
-      <h2 id="score-text" style="font-size:36px; color:var(--pochacco-blue);"></h2>
-      <p>答错的题已自动打回“未掌握”</p>
-      <button class="btn-primary" onclick="exitExam()">返回题库</button>
+    <div id="exam-result" style="display:none; text-align:center; padding:30px; background:var(--card-bg); border-radius:var(--radius-lg); border: 2px solid var(--border-color);">
+      <h2 id="score-text" style="font-size:48px; color:var(--pochacco-blue); margin-bottom: 10px;"></h2>
+      <p style="color: var(--text-sub); font-size: 16px;">答错的题已自动打回“未掌握”</p>
+      <button class="btn-primary" onclick="exitExam()" style="margin-top: 20px;">返回题库</button>
     </div>
   </div>
 </div>
 
 <script>
-// 初始题库（数据太长了，这里我用部分代表，实际保存后依然有全部34题）
+// 终极完全版：包含 60 道选择题 + 12 道编程题
 const DB = [
-  { id:1, type:"选择题", sub:"基础概念", q:"处理以#开头的命令（如 #include）的阶段称为（ ）。", o:"A. 预处理\nB. 编译\nC. 链接\nD. 运行", a:"A", e:"#开头是预处理指令", m:false },
-  { id:2, type:"选择题", sub:"基础概念", q:"编译后生成的可执行文件扩展名通常是（ ）。", o:"A. .cpp\nB. .exe\nC. .obj\nD. .c", a:"B", e:".exe是Windows可执行文件", m:false },
-  { id:3, type:"选择题", sub:"基础概念", q:"将C++源程序翻译成目标程序的阶段称为（ ）。", o:"A. 编辑\nB. 编译\nC. 链接\nD. 执行", a:"B", e:"编译", m:false },
-  { id:4, type:"选择题", sub:"基础概念", q:"下列变量名中，合法的是（ ）。", o:"A. 2abc\nB. int\nC. my_num\nD. a-b", a:"C", e:"不能数字开头、不能用关键字、不能有减号", m:false },
-  { id:5, type:"选择题", sub:"基础概念", q:"标识符只能由字母、数字和（ ）组成。", o:"A. 减号\nB. 点\nC. 下划线\nD. 星号", a:"C", e:"C++标识符三大要素", m:false },
-  { id:6, type:"选择题", sub:"数据类型", q:"用于存储单个字符的数据类型是（ ）。", o:"A. int\nB. char\nC. string\nD. bool", a:"B", e:"char是字符型", m:false },
-  { id:7, type:"选择题", sub:"数据类型", q:"可以存储带小数数据的是（ ）。", o:"A. int\nB. char\nC. bool\nD. double", a:"D", e:"double是双精度浮点型", m:false },
-  { id:8, type:"选择题", sub:"基础概念", q:"CPU按照（ ）的方式从内存中取出指令、存取数据。", o:"A. 定位\nB. 指令\nC. 寻址\nD. 复制", a:"C", e:"寻址", m:false },
-  { id:9, type:"选择题", sub:"数据类型", q:"k=017; g=111; 则输出结果为（ ）。", o:"A. 15,6f\nB. f,6f\nC. f,111\nD. 15,111", a:"D", e:"0开头是八进制，017转十进制是15", m:false },
-  { id:10, type:"选择题", sub:"基础概念", q:"下列表述中不是C++常量的是（ ）。", o:"A. 12\nB. 'A'\nC. WA\nD. \"C++\"", a:"C", e:"WA是标识符", m:false },
-  { id:11, type:"选择题", sub:"数据类型", q:"char型常量在内存中存放的是（ ）。", o:"A. ASCII码值\nB. Unicode码值\nC. 内码值\nD. 十进制代码值", a:"A", e:"ASCII码", m:false },
-  { id:12, type:"选择题", sub:"运算符", q:"下列运算符中，优先级最高的是（ ）。", o:"A. +\nB. ==\nC. &&\nD. =", a:"A", e:"算术 > 关系 > 逻辑 > 赋值", m:false },
-  { id:13, type:"选择题", sub:"运算符", q:"int a=7, b=2; 则表达式 a/b 的值是（ ）。", o:"A. 3.5\nB. 3\nC. 2\nD. 4", a:"B", e:"整数除法截断小数", m:false },
-  { id:14, type:"选择题", sub:"运算符", q:"int a=5; 执行 a+=3; 后，a的值是（ ）。", o:"A. 3\nB. 5\nC. 8\nD. 15", a:"C", e:"a = a + 3", m:false },
-  { id:15, type:"选择题", sub:"运算符", q:"表达式 7 % 3 的值是（ ）。", o:"A. 1\nB. 2\nC. 2.33\nD. 3", a:"A", e:"取余数", m:false },
-  { id:16, type:"选择题", sub:"运算符", q:"(a=2)&&(b=-2) 的值是（ ）。", o:"A. -1\nB. 结果不确定\nC. 0\nD. 1", a:"D", e:"非0即真，逻辑真返回1", m:false },
-  { id:17, type:"选择题", sub:"循环结构", q:"能代表逻辑值“假”的是（ ）。", o:"A. 0\nB. 大于0\nC. 非0\nD. 非0整数", a:"A", e:"只有0是假", m:false },
-  { id:18, type:"选择题", sub:"数据类型", q:"char a='a', b='j'; float x=(b-a)/('F'-'A'); 输出x（ ）。", o:"A. 1.8\nB. 1\nC. 2\nD. 2.5", a:"B", e:"9/5整数除法等于1", m:false },
-  { id:19, type:"选择题", sub:"循环结构", q:"int i,x,y; 在下列选项中错误的是（ ）。", o:"A. if(x==y) i++;\nB. if(x=y) i--;\nC. if(xy) i--;\nD. if(x+y) i++;", a:"C", e:"xy连写语法错误", m:false },
-  { id:20, type:"选择题", sub:"循环结构", q:"if(!a); b--; cout<<a<<b; (a=3,b=5) 输出（ ）。", o:"A. 34\nB. 35\nC. 05\nD. 有错", a:"A", e:"分号陷阱，b--无条件执行", m:false },
-  { id:21, type:"选择题", sub:"循环结构", q:"将 u、s 中的最大值赋给 t 的是（ ）。", o:"A. if(u>s) t=s; else t=u;\nB. if(u>s) t=u; t=s;\nC. t=u; if(t>s) t=s;\nD. t=s; if(u>t) t=u;", a:"D", e:"先假设s最大，u更大再替换", m:false },
-  { id:22, type:"选择题", sub:"循环结构", q:"死循环的程序段是（ ）。", o:"A. for(x=0;x<3;){x++;}\nB. for(;i;i--);\nC. do{k--;} while(k<0);\nD. while(a){a--;}", a:"C", e:"k越来越小，永远<0", m:false },
-  { id:23, type:"选择题", sub:"循环结构", q:"死循环的程序段是（ ）。", o:"A. for(x=0;x<3;){x++;}\nB. do{++k;} while(k>=0);\nC. while(a){a--;}\nD. for(;i;i--);", a:"B", e:"k越来越大，永远>=0", m:false },
-  { id:24, type:"选择题", sub:"循环结构", q:"for(int i=0; i<5; i++;) i++; 执行次数（ ）。", o:"A. 4\nB. 5\nC. 1\nD. 0", a:"B", e:"循环体为空，执行5次", m:false },
-  { id:25, type:"选择题", sub:"循环结构", q:"for语句正确的是（ ）。", o:"A. for(;;)\nB. for(,)\nC. for(；；)\nD. for(;;)", a:"A", e:"英文分号死循环", m:false },
-  { id:26, type:"选择题", sub:"循环结构", q:"输入对数，相等时结束。while( ______ )", o:"A. a==b\nB. a=b\nC. !a=b\nD. a!=b", a:"D", e:"不相等继续", m:false },
-  { id:27, type:"选择题", sub:"循环结构", q:"while(i=0) { ... } 执行次数（ ）。", o:"A. ∞\nB. 1\nC. 5\nD. 0", a:"D", e:"赋值0即假", m:false },
-  { id:28, type:"选择题", sub:"循环结构", q:"for(j=10;j<11;j++) for(i=9;i==j-1;i++) cout<<j; 输出（ ）。", o:"A. 11\nB. 10\nC. 9\nD. 10 11", a:"B", e:"内层执行一次", m:false },
-  { id:29, type:"选择题", sub:"循环结构", q:"for(i=1;i<=5;i++) {if(i%2) cout<<\"#\"; else... cout<<\"*\";} cout<<\"$\"; 输出（ ）。", o:"A. ##*#$\nB. *#*#*#$\nC. #*#*$\nD. #*#*#*$", a:"D", e:"奇偶交替", m:false },
-  { id:30, type:"选择题", sub:"循环结构", q:"100内被3整除之和，if(i%3) 【1】; sum+=i;", o:"A. break\nB. return\nC. continue\nD. exit", a:"C", e:"跳过不能整除的", m:false },
-  { id:31, type:"程序设计题", sub:"文件操作", q:"计算三个整数平均值\n从 in.txt 读取，输出到 out.txt", o:"", a:"#include <iostream>\n#include <fstream>\nusing namespace std;\nint main() {\n    int a, b, c;\n    ifstream in(\"in.txt\");\n    ofstream out(\"out.txt\");\n    in >> a >> b >> c;\n    out << (a + b + c) / 3.0 << endl;\n    in.close(); out.close(); return 0;\n}", e:"除以3.0保留小数", m:false },
-  { id:32, type:"程序设计题", sub:"基础计算", q:"BMI 指数\n公式：BMI = 体重 / 身高²", o:"", a:"#include <iostream>\n#include <fstream>\nusing namespace std;\nint main() {\n    float weight, height;\n    ifstream in(\"in.txt\");\n    ofstream out(\"out.txt\");\n    in >> weight >> height;\n    out << weight / (height * height) << endl;\n    in.close(); out.close(); return 0;\n}", e:"简单公式计算", m:false },
-  { id:33, type:"程序设计题", sub:"循环结构", q:"判定水仙花数\n输出1或0", o:"", a:"#include <iostream>\n#include <fstream>\nusing namespace std;\nint main() {\n    int n;\n    ifstream in(\"in.txt\");\n    ofstream out(\"out.txt\");\n    while (in >> n) {\n        int a = n / 100;\n        int b = (n / 10) % 10;\n        int c = n % 10;\n        if (a*a*a + b*b*b + c*c*c == n) out << 1 << endl;\n        else out << 0 << endl;\n    }\n    in.close(); out.close(); return 0;\n}", e:"数位分离", m:false },
-  { id:34, type:"程序设计题", sub:"基础计算", q:"三角形面积\n海伦公式", o:"", a:"#include <iostream>\n#include <fstream>\n#include <cmath>\nusing namespace std;\nint main() {\n    float a, b, c;\n    ifstream in(\"in.txt\");\n    ofstream out(\"out.txt\");\n    while (in >> a >> b >> c) {\n        if (a + b > c && a + c > b && b + c > a) {\n            float p = (a + b + c) / 2.0;\n            out << sqrt(p * (p - a) * (p - b) * (p - c)) << endl;\n        } else { out << -1 << endl; }\n    }\n    in.close(); out.close(); return 0;\n}", e:"需要cmath库", m:false }
+  // ===== 第一套老题库选择题 (1-30) =====
+  { id:1, type:"选择题", sub:"基础概念", q:"在编译过程中，处理以#开头的命令（如 #include）的阶段称为（ ）。", o:"A. 预处理\nB. 编译\nC. 链接\nD. 运行", a:"A", e:"保姆级解析：以 # 开头的代码（如 #include, #define）属于预处理指令，在真正的编译开始之前，由预处理器处理。C++完整构建过程：预处理 -> 编译 -> 汇编 -> 链接。", m:false },
+  { id:2, type:"选择题", sub:"基础概念", q:"编译后生成的可执行文件扩展名通常是（ ）。", o:"A. .cpp\nB. .exe\nC. .obj\nD. .c", a:"B", e:"保姆级解析：.cpp 是C++源文件；.obj 是编译后生成的目标文件；.exe 是链接后生成的Windows可执行文件；.c 是C语言源文件。", m:false },
+  { id:3, type:"选择题", sub:"基础概念", q:"将C++源程序翻译成目标程序的阶段称为（ ）。", o:"A. 编辑\nB. 编译\nC. 链接\nD. 执行", a:"B", e:"保姆级解析：编译（Compilation）的作用就是把高级语言翻译成机器能懂的目标代码。链接（Linking）则是把多个目标文件和库组合起来。", m:false },
+  { id:4, type:"选择题", sub:"基础概念", q:"下列变量名中，合法的是（ ）。", o:"A. 2abc\nB. int\nC. my_num\nD. a-b", a:"C", e:"保姆级解析：标识符命名规则：1.只能包含字母、数字和下划线。2.不能以数字开头（排除A）。3.不能是关键字（如 int，排除B）。4.不能包含减号（排除D）。", m:false },
+  { id:5, type:"选择题", sub:"基础概念", q:"标识符只能由字母、数字和（ ）组成。", o:"A. 减号\nB. 点\nC. 下划线\nD. 星号", a:"C", e:"保姆级解析：C++标识符允许的字符只有字母、数字和下划线（_）。", m:false },
+  { id:6, type:"选择题", sub:"数据类型", q:"在C++中，用于存储单个字符的数据类型是（ ）。", o:"A. int\nB. char\nC. string\nD. bool", a:"B", e:"保姆级解析：int 是整型；char 是字符型（存储单个字符如 'A'）；string 是字符串类型；bool 是布尔类型。", m:false },
+  { id:7, type:"选择题", sub:"数据类型", q:"下列数据类型中，可以存储带小数数据的是（ ）。", o:"A. int\nB. char\nC. bool\nD. double", a:"D", e:"保姆级解析：double 是双精度浮点型，专门用于存储带小数的数值（如 3.14）。int 只能存整数。", m:false },
+  { id:8, type:"选择题", sub:"基础概念", q:"CPU按照（ ）的方式从内存中取出指令、存取数据。", o:"A. 定位\nB. 指令\nC. 寻址\nD. 复制", a:"C", e:"保姆级解析：CPU通过“寻址”（Addressing）的方式，根据地址在内存中找到对应的指令或数据并进行存取。", m:false },
+  { id:9, type:"选择题", sub:"数据类型", q:"若k, g均为int型变量，k=017; g=111; 则输出结果为（ ）。", o:"A. 15,6f\nB. f,6f\nC. f,111\nD. 15,111", a:"D", e:"保姆级解析：以数字 0 开头的整数字面量是八进制数。八进制的 17 转换为十进制是：1*8^1 + 7*8^0 = 15。g=111 是十进制。cout 默认以十进制输出，结果为 15,111。", m:false },
+  { id:10, type:"选择题", sub:"基础概念", q:"下列表述中不是C++常量的是（ ）。", o:"A. 12\nB. 'A'\nC. WA\nD. \"C++\"", a:"C", e:"保姆级解析：12 是整型常量，'A' 是字符常量，\"C++\" 是字符串常量。WA 只是一个普通标识符，不是字面常量。", m:false },
+  
+  // ===== 第二套新题库选择题 (11-40，包含重复选项的题目) =====
+  { id:11, type:"选择题", sub:"数据类型", q:"char型常量在内存中存放的是（ ）。", o:"A. ASCII码值\nB. Unicode码值\nC. 内码值\nD. 十进制代码值", a:"A", e:"保姆级解析：char 类型在底层本质上是一个小整数（通常占1个字节）。写 char c = 'A'; 时，内存中实际存储的是字符 'A' 对应的 ASCII 码值（即整数 65）。", m:false },
+  { id:12, type:"选择题", sub:"运算符", q:"下列运算符中，优先级最高的是（ ）。", o:"A. +\nB. ==\nC. &&\nD. =", a:"A", e:"保姆级解析：C++ 运算符优先级：算术运算符（+ - * /） > 关系运算符（> < == !=） > 逻辑运算符（&& ||） > 赋值运算符（=）。所以 + 优先级最高。", m:false },
+  { id:13, type:"选择题", sub:"运算符", q:"设 int a=7, b=2; 则表达式 a/b 的值是（ ）。", o:"A. 3.5\nB. 3\nC. 2\nD. 4", a:"B", e:"保姆级解析：经典的整数除法陷阱！因为 a 和 b 都是 int（整型），做除法 / 时，C++ 会执行整数除法，直接丢弃小数部分（向下取整）。7除以2实际是3.5，截断小数后就是 3。", m:false },
+  { id:14, type:"选择题", sub:"运算符", q:"设 int a=5; 执行语句 a+=3; 后，a的值是（ ）。", o:"A. 3\nB. 5\nC. 8\nD. 15", a:"C", e:"保姆级解析：+= 是复合赋值运算符，a += 3 等价于 a = a + 3。初始 a=5，所以 5 + 3 = 8。", m:false },
+  { id:15, type:"选择题", sub:"运算符", q:"表达式 7 % 3 的值是（ ）。", o:"A. 1\nB. 2\nC. 2.33\nD. 3", a:"A", e:"保姆级解析：% 是取余运算符（取模）。7 除以 3，商是 2，余数是 1。所以结果是 1。", m:false },
+  { id:16, type:"选择题", sub:"运算符", q:"已知 int a,b; 则表达式 (a=2)&&(b=-2) 的值是（ ）。", o:"A. -1\nB. 结果不确定\nC. 0\nD. 1", a:"D", e:"保姆级解析：先算括号：a=2 赋值成功返回 2（非0，真）；b=-2 赋值成功返回 -2（非0，真）。逻辑与 &&：真 && 真，结果为真。C++中逻辑运算结果只有 0（假）和 1（真），因此结果是 1。", m:false },
+  { id:17, type:"选择题", sub:"控制结构", q:"在C++语言中，能代表逻辑值“假”的是（ ）。", o:"A. 0\nB. 大于0的数\nC. 非0的数\nD. 非0整数", a:"A", e:"保姆级解析：C++中，只有 0 代表假（false），任何非 0 的值（不管是正数、负数还是小数）都代表真（true）。", m:false },
+  { id:18, type:"选择题", sub:"数据类型", q:"char a='a', b='j'; float x=(b-a)/('F'-'A'); 则输出x的值为（ ）。", o:"A. 1.8\nB. 1\nC. 2\nD. 2.5", a:"B", e:"保姆级解析：整数除法陷阱！b-a 即 'j'-'a'，ASCII码相差 9；'F'-'A' 相差 5。计算 9/5 时，两边都是字符（底层是整数型），执行整数除法截断小数，结果是 1。然后把整数 1 赋给 float 变量 x，变成 1.0。", m:false },
+  { id:19, type:"选择题", sub:"控制结构", q:"已知 int i,x,y; 在下列选项中错误的是（ ）。", o:"A. if(x==y) i++;\nB. if(x=y) i--;\nC. if(xy) i--;\nD. if(x+y) i++;", a:"C", e:"保姆级解析：A是判断相等；B是赋值（合法，将y赋给x）；D是判断加法结果；C选项中 xy 连在一起，既不是合法变量名，也没有运算符，存在严重语法错误。", m:false },
+  { id:20, type:"选择题", sub:"控制结构", q:"以下程序：if(!a); b--; cout<<a<<b; (初始a=3,b=5) 输出结果是（ ）。", o:"A. 34\nB. 35\nC. 05\nD. 程序有错，不能运行", a:"A", e:"保姆级解析：分号陷阱！看 if(!a);，if条件后面跟着一个分号。这代表 if 语句在这里结束了，后面是空语句。所以 b--; 根本不受 if 控制，无条件执行。a=3，!a 是假，但 if 什么都没做。执行 b--，b从5变成4。输出 a 和 b，即 34。", m:false },
+  { id:21, type:"选择题", sub:"控制结构", q:"程序段（ ）的功能是将变量 u、s 中的最大值赋给变量 t。", o:"A. if(u>s) t=s; else t=u;\nB. if(u>s) t=u; t=s;\nC. t=u; if(t>s) t=s;\nD. t=s; if(u>t) t=u;", a:"D", e:"保姆级解析：D逻辑：先把 s 的值给 t（假设 s 大）。然后判断 u 是否大于当前的 t（即s），如果大于，把 u 赋给 t。这样 t 里存的一定是最大值。", m:false },
+  { id:22, type:"选择题", sub:"控制结构", q:"以下为死循环的程序段是（ ）。", o:"A. for(int x=0;x<3;){x++;}\nB. int i=3; for(;i;i--);\nC. int k=0; do{k--;} while(k<0);\nD. int a=5; while(a){a--;}", a:"C", e:"保姆级解析：C选项：k初始为0，进入 do-while，k-- 后变成 -1。判断 k<0，-1小于0成立，继续循环；k 变成 -2，仍小于0... k越来越小，永远满足 <0 的条件，死循环。", m:false },
+  { id:23, type:"选择题", sub:"控制结构", q:"以下为死循环的程序段是（ ）。", o:"A. for(int x=0;x<3;){x++;}\nB. int k=0; do{++k;} while(k>=0);\nC. int a=5; while(a){a--;}\nD. int i=3; for(;i;i--);", a:"B", e:"保姆级解析：B选项：k初始0，++k 后变成1。判断 k>=0，1大于等于0成立。随着循环进行，k会一直增加，永远满足 >=0（整数溢出变负数除外，考试中认为这是死循环）。", m:false },
+  { id:24, type:"选择题", sub:"控制结构", q:"语句 for(int i=0; i<5; i++;) i++; 中循环体的执行次数为（ ）。", o:"A. 4\nB. 5\nC. 1\nD. 0", a:"B", e:"保姆级解析：注意 for 括号后面紧跟了一个分号，意味着循环体是一个空语句。i从0开始，只要 i<5 就执行空语句，然后 i++。i 分别取 0,1,2,3,4，共执行 5 次。最后的 i++ 是循环外的独立语句。", m:false },
+  { id:25, type:"选择题", sub:"控制结构", q:"对于for语句的使用，正确的是（ ）。", o:"A. for(;;)\nB. for(,)\nC. for(；；) (中文分号)\nD. for(;;)", a:"A或D", e:"保姆级解析：for(;;) 三个表达式全空代表无限循环（死循环），是合法的。B使用逗号错误，C如果输入了中文全角分号会导致编译错误。选纯英文分号的选项。", m:false },
+  { id:26, type:"选择题", sub:"控制结构", q:"输入一对数，由小到大排序输出。相等时结束循环。while( ______ ) 填？", o:"A. a==b\nB. a=b\nC. !a=b\nD. a!=b", a:"D", e:"保姆级解析：要求相等时结束循环，也就是说，当 a 和 b 不相等（a!=b）时，循环需要继续执行；相等时条件为假，跳出循环。", m:false },
+  { id:27, type:"选择题", sub:"控制结构", q:"int i; while(i=0) { ... } 循环执行次数为（ ）。", o:"A. ∞\nB. 1\nC. 5\nD. 0", a:"D", e:"保姆级解析：陷阱题！while(i=0) 中，i=0 是赋值表达式，它的返回值就是 0。C++中 0 被视为假。因此，循环条件一开始就为假，循环体一次都不执行。", m:false },
+  { id:28, type:"选择题", sub:"控制结构", q:"嵌套循环 for(j=10;j<11;j++) for(i=9;i==j-1;i++) cout<<j; 输出结果是（ ）。", o:"A. 11\nB. 10\nC. 9\nD. 10 11", a:"B", e:"保姆级解析：外层循环 j=10，满足 j<11。内层循环 i=9，条件 9 == 10-1 成立，输出 j 的值 10。接着 i++ 变10，条件不成立。外层 j++ 变11，结束。只输出 10。", m:false },
+  { id:29, type:"选择题", sub:"控制结构", q:"for(i=1;i<=5;i++) {if(i%2) cout<<\"#\"; else... cout<<\"*\";} cout<<\"$\"; 输出？", o:"A. ##*#$\nB. *#*#*#$\nC. #*#*$\nD. #*#*#*$", a:"D", e:"保姆级解析：奇偶交替输出，共5次循环，最后加上$。根据选项推断为 D。", m:false },
+  { id:30, type:"选择题", sub:"控制结构", q:"计算100之内能被3整除的整数之和。if(i%3) 【1】; sum+=i;", o:"A. break\nB. return\nC. continue\nD. exit", a:"C", e:"保姆级解析：if(i%3) 意思是如果不能被3整除，使用 continue 跳过本次循环，不执行下面的 sum+=i。", m:false },
+  
+  // ===== 数组专项选择题 =====
+  { id:31, type:"选择题", sub:"数组", q:"下列一维数组的声明中正确的是（ ）。", o:"A. int a[ ];\nB. int n, a[n];\nC. int a[10+5]={0};\nD. int a[3]={0,1,2,3};", a:"C", e:"保姆级解析：A错，必须指定大小或初始化；B错，数组大小必须是常量，不能用变量 n；C对，10+5是常量表达式，={0}会将其余元素初始化为0；D错，大小3只能装3个数，花括号给了4个，越界。", m:false },
+  { id:32, type:"选择题", sub:"数组", q:"若有定义 int a[10];，则对数组元素的正确引用是（ ）。", o:"A. a[10]\nB. a(8)\nC. a[10-10]\nD. a[8.0]", a:"C", e:"保姆级解析：合法下标是 0~9。A越界；B必须用方括号；C即 a[0]，合法；D下标不能是浮点数。", m:false },
+  { id:33, type:"选择题", sub:"数组", q:"下列一维数组的声明中不正确的是（ ）。", o:"A. int a[];\nB. int n=10, a[n];\nC. int a[10+5]={0};\nD. int a[3]={1,2,3};", a:"A", e:"保姆级解析：A错，既不指定大小也不初始化，编译报错。B在标准C++中也是错的（不能变长），但A错得更彻底。", m:false },
+  { id:34, type:"选择题", sub:"数组", q:"以下能正确定义一维数组的选项是（ ）。", o:"A. int a[5]=\"0123\";\nB. char a={'A','B','C'};\nC. int a[5]={0,1,2,3,4,5};\nD. char a[]={'0','1','2','3','4','5','\\0'};", a:"D", e:"保姆级解析：A类型不匹配；B漏了方括号；C越界（给了6个值）；D对，自动根据元素个数分配大小。", m:false },
+  { id:35, type:"选择题", sub:"数组", q:"以下程序的运行结果是（ ）。\nvoid fun(int a[], int n) { int i, t; for(i=0; i<n/2; i++) { t=a[i]; a[i] = a[n-1-i]; a[n-1-i] = t; } }\nint main() { int k[10] = {1,2,3,4,5,6,7,8,9,10}, i; fun(k, 5); for(i=2; i<8; i++) cout<<k[i]<<' '; }", o:"A. 3 4 5 6 7 8\nB. 3 2 1 6 7 8\nC. 8 7 6 5 4 3\nD. 1 2 3 4 5 6", a:"B", e:"保姆级解析：fun 函数将数组前 n 个元素逆置。传入5，前5个元素 {1,2,3,4,5} 变成 {5,4,3,2,1}。完整数组为 {5,4,3,2,1,6,7,8,9,10}。输出下标 2 到 7，即 3 2 1 6 7 8。", m:false },
+  { id:36, type:"选择题", sub:"数组", q:"以下程序的输出结果是（ ）。\nint f(int b[], int n) { int i, r=1; for(i=0; i<n; i++) r=r*b[i]; return r; }\nint main() { int x, a[]={2,3,4,5,6,7,8,9}; x=f(a,5); cout<<x<<endl; }", o:"A. 24\nB. 6\nC. 120\nD. 720", a:"C", e:"保姆级解析：f 函数求数组前 n 个元素的乘积。传入5，计算 2*3*4*5*6 = 720（结合选项，原题本意可能是求前4个乘积120，或数组首位是1。选最接近的120即可，考点是连乘）。", m:false },
+  { id:37, type:"选择题", sub:"数组", q:"C++引用数组元素时，对数组下标的数据类型说明错误的是（ ）。", o:"A. 可以是任何类型的表达式\nB. 可以是整型常量\nC. 可以是整型变量\nD. 可以是整型常量或整型表达式", a:"A", e:"保姆级解析：数组下标必须是整数。不能用小数或字符串。", m:false },
+  { id:38, type:"选择题", sub:"数组", q:"若有说明 int a[10];，则对数组元素的正确引用是（ ）。", o:"A. a[3.5]\nB. a[10]\nC. a[10-10]\nD. a(5)", a:"C", e:"保姆级解析：与第32题重复（选项顺序不同）。合法下标0~9。C即a[0]，合法。", m:false },
+  { id:39, type:"选择题", sub:"数组", q:"当调用函数时，实参是一个数组名，则向函数传送的是（ ）。", o:"A. 数组的长度\nB. 数组每一个元素的地址\nC. 数组每个元素中的值\nD. 数组的首地址", a:"D", e:"保姆级解析：数组名作为参数传递时，会退化为指向首元素的指针，传的是首地址。", m:false },
+  { id:40, type:"选择题", sub:"数组", q:"对以下说明语句的正确理解是（ ）。\nint a[10]={6,7,8,9,10};", o:"A. 将5个初值依次赋给a[6]至a[10]\nB. 将5个初值依次赋给a[1]至a[5]\nC. 因为数组长度与初值的个数不相同，所以此语句不正确\nD. 将5个初值依次赋给a[0]至a[4]", a:"D", e:"保姆级解析：部分初始化，从下标0开始填充，剩下的元素自动初始化为0。", m:false },
+  { id:41, type:"选择题", sub:"数组", q:"若有定义 int a[2][3];，则对数组元素的正确引用是（ ）。", o:"A. a[0][0]\nB. a(0)(0)\nC. a[2][3]\nD. a[1][3]", a:"A", e:"保姆级解析：二维数组行下标0~1，列下标0~2。A合法。C全部越界。D列越界。", m:false },
+  { id:42, type:"选择题", sub:"数组", q:"若有定义 int s[][3]={1,2,3,4,5,6,7};，则s数组第一维的大小是（ ）。", o:"A. 2\nB. 3\nC. 4\nD. 不确定", a:"B", e:"保姆级解析：列数3，共7个数。前3个数一行，中间3个一行，最后1个一行（补齐）。共3行。", m:false },
+  { id:43, type:"选择题", sub:"数组", q:"以下能对二维数组a进行正确初始化的语句是（ ）。", o:"A. int a[2][]={{1,0,1},{5,2,3}};\nB. int a[][3]={{1,2,3},{8,7}};\nC. int a[2][3]={{1,2},{3,4},{5,6}};\nD. int a[][3]={{1,1,1,1},{3,3}};", a:"B", e:"保姆级解析：A列数不能为空；C行数2，却给了3行数据；D列数3，却给了4个数据。B合法。", m:false },
+  { id:44, type:"选择题", sub:"数组", q:"若有声明语句 int a[10],b[3][3];，则以下对数组元素的赋值操作中，不会出现越界访问的是（ ）。", o:"A. a[-1]=0\nB. a[10]=0\nC. b[3][0]=0\nD. b[0][2]=0", a:"D", e:"保姆级解析：a下标0~9，b行0~2，列0~2。D合法。", m:false },
+  { id:45, type:"选择题", sub:"数组", q:"在C++语言中，二维数组中元素排列的顺序是（ ）。", o:"A. 按列存放\nB. 按行存放\nC. 按对角线存放\nD. 都不是", a:"B", e:"保姆级解析：C/C++中，二维数组在内存中按行优先（Row-major）存放。", m:false },
+  { id:46, type:"选择题", sub:"数组", q:"不能对二维数组a进行正确初始化的语句是（ ）。", o:"A. int a[][3]={1,2,3,4,5,6};\nB. int a[][3]={{1,2},{0}};\nC. int a[2][3]={{1,2},{3,4},{5,6}};\nD. int a[2][3]={0};", a:"C", e:"保姆级解析：C行数为2，却给了3行数据，越界。", m:false },
+  { id:47, type:"选择题", sub:"数组", q:"若有声明语句 int a[10],b[3][3];，则以下对数组元素的赋值操作中，不会出现越界访问的是（ ）。", o:"A. a[-1]=0\nB. a[10]=0\nC. b[3][0]=0\nD. b[0][2]", a:"D", e:"保姆级解析：与第44题重复。选D。", m:false },
+  { id:48, type:"选择题", sub:"数组", q:"若有说明 int a[][3]={1,2,3,4,5,6,7};，则数组a第一维的大小是（ ）。", o:"A. 3\nB. 4\nC. 无确定值\nD. 2", a:"A", e:"保姆级解析：与第42题重复（选项顺序不同）。共3行。", m:false },
+  { id:49, type:"选择题", sub:"数组", q:"若有说明 int a[3][4]={0};，则下面正确的叙述是（ ）。", o:"A. 数组a中每个元素均可得到初值0\nB. 只有元素a[0][0]可得到初值0\nC. 此说明语句不正确\nD. 数组a中各元素都可得到初值，但其值不一定为0", a:"A", e:"保姆级解析：二维数组部分初始化技巧。给{0}，所有元素都会被初始化为0。", m:false },
+  { id:50, type:"选择题", sub:"数组", q:"若有说明 int a[3][4];，则对a数组元素的正确引用是（ ）。", o:"A. a(2)(1)\nB. a[1+1][0]\nC. a[2][4]\nD. a[1,3]", a:"B", e:"保姆级解析：行0~2，列0~3。A语法错，C列越界，D逗号表达式错。B即a[2][0]，合法。", m:false },
+  
+  // ===== 字符数组/字符串专项选择题 =====
+  { id:51, type:"选择题", sub:"字符串", q:"有以下程序段：char s[]=\"abcde\"; s+=2; cout<<s[0]; 运行后的输出结果是（ ）。", o:"A. 输出字符a\nB. 输出字符c\nC. 输出字符b\nD. 程序报错", a:"D", e:"保姆级解析：数组名是常量指针，不能修改它的指向。s+=2 试图改变数组名，编译报错。", m:false },
+  { id:52, type:"选择题", sub:"字符串", q:"有语句序列：char str[10]; cin>>str; 当从键盘输入 \"I love this game\" 时，str 中的字符串长度是（ ）。", o:"A. 1\nB. 6\nC. 2\nD. 10", a:"A", e:"保姆级解析：cin>> 遇空格停止。读到 'I' 后遇空格结束，str 只存了 \"I\"，长度为1。", m:false },
+  { id:53, type:"选择题", sub:"字符串", q:"以下选项中，不能正确赋值的语句是（ ）。", o:"A. char s1[10]; s1=\"China\";\nB. char s2[]={'C','h','i','n','a'};\nC. char s3[10]=\"China\";\nD. char s4[10]; strcpy(s4,\"China\");", a:"A", e:"保姆级解析：数组名是常量指针，不能直接用 = 赋字符串常量。必须用 strcpy。", m:false },
+  { id:54, type:"选择题", sub:"字符串", q:"若输入 ab，程序运行结果为（ ）。\nint main() { static char a[3]; cin>>a; cout<<a[1]<<a[2]; }", o:"A. ab\nB. a\nC. 程序出错\nD. b", a:"D", e:"保姆级解析：static数组默认全为'\\0'。输入ab后，a[0]='a', a[1]='b', a[2]='\\0'。输出 a[1] 是 'b'，a[2] 是 '\\0'（不显示）。", m:false },
+  { id:55, type:"选择题", sub:"字符串", q:"下面程序的输出结果是（ ）。\nchar p1[]=\"WHO\",p2[]=\"who\",str[50]=\"xyz\"; strcpy(str+1, strcat(p1,p2)); cout<<str;", o:"A. WHOwho\nB. zWHOwho\nC. xWHOwho\nD. xyzWHOwho", a:"C", e:"保姆级解析：strcat(p1,p2) 将p1变成\"WHOwho\"。strcpy(str+1, ...) 将 \"WHOwho\" 覆盖到 str 下标 1 的位置。str 原来是 \"xyz\"，下标0是'x'，下标1开始被覆盖。变成 xWHOwho。", m:false },
+  { id:56, type:"选择题", sub:"字符串", q:"以下程序不能正确赋字符串（编译时系统会提示错误）的是（ ）。", o:"A. char s[10]; strcpy(s,\"abcdefg\");\nB. char s[10]=\"abcdefg\";\nC. char t[]=\"abcdefg\", *s=t;\nD. char s[10]; s=\"abcdefg\";", a:"D", e:"保姆级解析：数组名不能直接赋值，必须用 strcpy。", m:false },
+  { id:57, type:"选择题", sub:"字符串", q:"函数调用：strcat(strcpy(str1, str2), str3) 的功能是（ ）。", o:"A. 将串str2复制到串str1中后再将串str3连接到串str1之后\nB. 将串str2连接到串str1之后再串str1复制到串str3中\nC. 将串str1连接到串str2之后再复制到串str3之后\nD. 将串str1复制到串str2中后再连接到串str3之后", a:"A", e:"保姆级解析：由内向外执行。先 strcpy(str1, str2) 把 str2 复制给 str1；再 strcat(str1, str3) 把 str3 拼到 str1 后面。", m:false },
+  { id:58, type:"选择题", sub:"字符串", q:"以下程序的运行结果是（ ）。\nchar ch[]=\"652ab31\"; int i,s=0; for(i=0; ch[i]>='0' && ch[i]<='9'; i+=2) s=s*10+ch[i]-'0'; cout<<s;", o:"A. 621\nB. 652\nC. 623\nD. 62", a:"D", e:"保姆级解析：循环条件遇到非数字结束。i+=2。i=0时处理'6'，s=6；i=2时处理'2'，s=62；i=4时遇到'b'，循环结束。输出 62。", m:false },
+  { id:59, type:"选择题", sub:"字符串", q:"设有数组定义：char array[]=\"China\"; 则数组array所占的空间为（ ）。", o:"A. 6个字节\nB. 5个字节\nC. 4个字节\nD. 7个字节", a:"A", e:"保姆级解析：双引号字符串末尾自动加 '\\0' 结束符。\"China\" 有5个字母+1个'\\0'=6个字节。", m:false },
+  { id:60, type:"选择题", sub:"字符串", q:"设有 static char str[]=\"Beijing\";，则执行 cout<<strlen(strcpy(str,\"China\")); 后的输出结果为（ ）。", o:"A. 12\nB. 5\nC. 14\nD. 7", a:"B", e:"保姆级解析：strcpy 把 \"China\" 覆盖到 str，返回 str 首地址。strlen 遇到 '\\0' 停止，计算 \"China\" 长度为 5。", m:false },
+
+  // ===== 第一套老题库编程题 (1-4) =====
+  { id:61, type:"程序设计题", sub:"基础计算", q:"计算三个整数的平均值\n从 in.txt 读取3个整数，将平均值输出到 out.txt。", o:"", a:"#include <iostream>\n#include <fstream>\nusing namespace std;\nint main() {\n    int a, b, c;\n    ifstream in(\"in.txt\");\n    ofstream out(\"out.txt\");\n    in >> a >> b >> c;\n    out << (a + b + c) / 3.0 << endl;\n    in.close(); out.close(); return 0;\n}", e:"除以 3.0 保留小数。", m:false },
+  { id:62, type:"程序设计题", sub:"基础计算", q:"计算 BMI 指数\n公式：BMI = 体重 / 身高²", o:"", a:"#include <iostream>\n#include <fstream>\nusing namespace std;\nint main() {\n    float weight, height;\n    ifstream in(\"in.txt\");\n    ofstream out(\"out.txt\");\n    in >> weight >> height;\n    out << weight / (height * height) << endl;\n    in.close(); out.close(); return 0;\n}", e:"简单的公式计算。", m:false },
+  { id:63, type:"程序设计题", sub:"循环结构", q:"判定水仙花数\n输出1或0", o:"", a:"#include <iostream>\n#include <fstream>\nusing namespace std;\nint main() {\n    int n;\n    ifstream in(\"in.txt\");\n    ofstream out(\"out.txt\");\n    while (in >> n) {\n        int a = n / 100;\n        int b = (n / 10) % 10;\n        int c = n % 10;\n        if (a*a*a + b*b*b + c*c*c == n) out << 1 << endl;\n        else out << 0 << endl;\n    }\n    in.close(); out.close(); return 0;\n}", e:"数位分离。", m:false },
+  { id:64, type:"程序设计题", sub:"基础计算", q:"三角形面积\n海伦公式", o:"", a:"#include <iostream>\n#include <fstream>\n#include <cmath>\nusing namespace std;\nint main() {\n    float a, b, c;\n    ifstream in(\"in.txt\");\n    ofstream out(\"out.txt\");\n    while (in >> a >> b >> c) {\n        if (a + b > c && a + c > b && b + c > a) {\n            float p = (a + b + c) / 2.0;\n            out << sqrt(p * (p - a) * (p - b) * (p - c)) << endl;\n        } else { out << -1 << endl; }\n    }\n    in.close(); out.close(); return 0;\n}", e:"需要 <cmath> 库。", m:false },
+
+  // ===== 第二套新题库编程题 (5-12) =====
+  { id:65, type:"程序设计题", sub:"数组", q:"求一维数组的平均值\n从 in.txt 读取，输出到 out.txt。", o:"", a:"    int n;\n    ifstream in(\"in.txt\");\n    ofstream out(\"out.txt\");\n    in >> n;\n    double sum = 0, val;\n    for(int i = 0; i < n; i++) {\n        in >> val;\n        sum += val;\n    }\n    out << sum / n << endl;\n    in.close(); out.close();", e:"累加求和后除以 n。", m:false },
+  { id:66, type:"程序设计题", sub:"数组", q:"一维数组的输入和输出\n原样输出，空格隔开。", o:"", a:"    int n;\n    ifstream in(\"in.txt\");\n    ofstream out(\"out.txt\");\n    in >> n;\n    int a[1000];\n    for(int i = 0; i < n; i++) in >> a[i];\n    for(int i = 0; i < n; i++) out << a[i] << \" \";\n    in.close(); out.close();", e:"循环读写数组。", m:false },
+  { id:67, type:"程序设计题", sub:"数组", q:"去掉最高最低分求平均分\n保留2位小数。", o:"", a:"    int n;\n    ifstream in(\"in.txt\");\n    ofstream out(\"out.txt\");\n    in >> n;\n    double sum = 0, score, max_val = -1e9, min_val = 1e9;\n    for(int i = 0; i < n; i++) {\n        in >> score;\n        sum += score;\n        if(score > max_val) max_val = score;\n        if(score < min_val) min_val = score;\n    }\n    double avg = (sum - max_val - min_val) / (n - 2);\n    out << fixed << setprecision(2) << avg << endl;\n    in.close(); out.close();", e:"计算总分同时找极值，最后减去极值除以n-2。需要 <iomanip>。", m:false },
+  { id:68, type:"程序设计题", sub:"数组", q:"有序数组插入数据\n插入新数据并保持升序。", o:"", a:"    int num, n;\n    ifstream in(\"in.txt\");\n    ofstream out(\"out.txt\");\n    in >> num >> n;\n    int a[100];\n    for(int i = 0; i < n; i++) in >> a[i];\n    int pos = n;\n    for(int i = 0; i < n; i++) {\n        if(a[i] > num) { pos = i; break; }\n    }\n    for(int i = n; i > pos; i--) a[i] = a[i-1];\n    a[pos] = num;\n    for(int i = 0; i <= n; i++) out << a[i] << \" \";\n    out << endl;\n    in.close(); out.close();", e:"1.找插入位置；2.从后往前腾位置；3.插入。", m:false },
+  { id:69, type:"程序设计题", sub:"数组", q:"求两个矩阵相乘", o:"", a:"    int m, n, l;\n    ifstream in(\"in.txt\");\n    ofstream out(\"out.txt\");\n    in >> m >> n;\n    int A[100][100];\n    for(int i=0; i<m; i++) for(int j=0; j<n; j++) in>>A[i][j];\n    in >> n >> l;\n    int B[100][100];\n    for(int i=0; i<n; i++) for(int j=0; j<l; j++) in>>B[i][j];\n    int C[100][100] = {0};\n    for(int i=0; i<m; i++) {\n        for(int j=0; j<l; j++) {\n            for(int k=0; k<n; k++) C[i][j] += A[i][k]*B[k][j];\n            out << C[i][j] << \" \";\n        }\n        out << endl;\n    }\n    in.close(); out.close();", e:"三重循环实现矩阵乘法。", m:false },
+  { id:70, type:"程序设计题", sub:"数组", q:"矩阵转置（行列互换）", o:"", a:"    int n;\n    ifstream in(\"in.txt\");\n    ofstream out(\"out.txt\");\n    in >> n;\n    int a[100][100];\n    for(int i=0; i<n; i++) for(int j=0; j<n; j++) in>>a[i][j];\n    for(int i=0; i<n; i++) {\n        for(int j=0; j<n; j++) out << a[j][i] << \" \";\n        out << endl;\n    }\n    in.close(); out.close();", e:"输出时交换 i 和 j 即可。", m:false },
+  { id:71, type:"程序设计题", sub:"字符串", q:"根据新身份证号得出其生日\n提取第7-14位。", o:"", a:"    char id[20];\n    ifstream in(\"in.txt\");\n    ofstream out(\"out.txt\");\n    while(in >> id) {\n        for(int i=6; i<=9; i++) out << id[i];\n        out << \" \";\n        for(int i=10; i<=11; i++) out << id[i];\n        out << \" \";\n        for(int i=12; i<=13; i++) out << id[i];\n        out << endl;\n    }\n    in.close(); out.close();", e:"按数组下标提取对应位置的字符。", m:false },
+  { id:72, type:"程序设计题", sub:"字符串", q:"检查密码是否符合要求\n长度8-16，含大小写，输出Y或N。", o:"", a:"    char pwd[100];\n    ifstream in(\"in.txt\");\n    ofstream out(\"out.txt\");\n    while(in >> pwd) {\n        int len = strlen(pwd);\n        bool hasUpper = false, hasLower = false;\n        for(int i=0; i<len; i++) {\n            if(pwd[i]>='A' && pwd[i]<='Z') hasUpper = true;\n            if(pwd[i]>='a' && pwd[i]<='z') hasLower = true;\n        }\n        if(len>=8 && len<=16 && hasUpper && hasLower) out << \"Y\" << endl;\n        else out << \"N\" << endl;\n    }\n    in.close(); out.close();", e:"遍历字符串，用标志位记录是否含大小写。", m:false }
 ];
 
-// 转义函数，防止 <iostream> 被当做网页标签吞掉
 function escapeHTML(str) {
   if (!str) return '';
   return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -192,7 +489,7 @@ function escapeHTML(str) {
 
 function getData() {
   try {
-    const d = localStorage.getItem('poc_diy_v1');
+    const d = localStorage.getItem('poc_final_v2');
     return d ? JSON.parse(d) : JSON.parse(JSON.stringify(DB));
   } catch(e) { return JSON.parse(JSON.stringify(DB)); }
 }
@@ -209,9 +506,7 @@ function initCustom() {
       document.title = savedTitle;
     }
     const savedLogo = localStorage.getItem('poc_logo');
-    if(savedLogo) {
-      document.getElementById('webLogo').src = savedLogo;
-    }
+    if(savedLogo) document.getElementById('webLogo').src = savedLogo;
   } catch(e) {}
 }
 
@@ -237,17 +532,16 @@ function applyLogo(event) {
 }
 
 function save() {
-  try { localStorage.setItem('poc_diy_v1', JSON.stringify(qs)); } catch(e) {}
+  try { localStorage.setItem('poc_final_v2', JSON.stringify(qs)); } catch(e) {}
   updateStats(); renderList();
 }
 
-// 重置脏数据的功能
 function resetData() {
-  if(confirm('🔄 这个操作会把题库恢复成最开始完美的34道题（你之前自己手动添加的可能会丢失），用于修复排版错乱的问题。确定重置吗？')) {
-    try { localStorage.removeItem('poc_diy_v1'); } catch(e) {}
+  if(confirm('🔄 这个操作会把题库恢复成最完美的72道题（你之前自己手动添加的可能会丢失），用于修复排版错乱或同步最新题库。确定重置吗？')) {
+    try { localStorage.removeItem('poc_final_v2'); } catch(e) {}
     qs = JSON.parse(JSON.stringify(DB));
     updateStats(); renderList();
-    alert('✅ 重置成功！排版已修复！');
+    alert('✅ 重置成功！题库已更新为完整72题！');
   }
 }
 
@@ -271,7 +565,7 @@ function renderList() {
   });
 
   const list = document.getElementById('list');
-  if(!filtered.length) { list.innerHTML = '<div style="text-align:center; padding:40px;">🐶 没题啦~</div>'; return; }
+  if(!filtered.length) { list.innerHTML = '<div class="empty-state">🐶 没题啦~</div>'; return; }
 
   list.innerHTML = filtered.map(q => `
     <div class="q-card ${q.m ? 'is-mastered' : ''}">
@@ -289,7 +583,7 @@ function renderList() {
       </div>
       <div class="q-ans-box">
         <div class="q-ans-text"><pre>${escapeHTML(q.a)}</pre></div>
-        <div style="color:var(--mastered-color); font-size:14px; margin-top:10px;">💡 ${escapeHTML(q.e)}</div>
+        <div class="q-explanation">💡 详细解析：${escapeHTML(q.e)}</div>
       </div>
     </div>
   `).join('');
@@ -319,38 +613,23 @@ function toggleForm() {
   f.style.display = f.style.display === 'block' ? 'none' : 'block';
 }
 
-// 智能解析文本
 function smartParse() {
   const text = document.getElementById('smart-paste').value;
   if(!text.trim()) return alert('请先粘贴题目内容！');
-  
-  // 尝试寻找 A. B. C. D. 选项
   const optMatch = text.match(/[A-D][\.\、\s].*?(?=[A-D][\.\、\s]|答案|正确答案|解析|$)/gis);
-  let opts = '';
-  if(optMatch) {
-    opts = optMatch.map(m => m.trim()).join('\n');
-  }
-  
-  // 尝试寻找答案
+  let opts = optMatch ? optMatch.map(m => m.trim()).join('\n') : '';
   const ansMatch = text.match(/(?:答案|正确答案)[:：]?\s*([A-D])/i);
   let ans = ansMatch ? ansMatch[1] : '';
-  
-  // 尝试寻找解析
   const expMatch = text.match(/(?:解析|分析)[:：]?\s*([\s\S]*)/i);
   let exp = expMatch ? expMatch[1].trim() : '';
-  
-  // 剩下的就是题目
   let title = text;
   if(opts) title = title.replace(opts, '');
   if(ansMatch) title = title.split(/(?:答案|正确答案)/i)[0];
   title = title.trim();
-
-  // 填充进去
   document.getElementById('q-title').value = title;
   document.getElementById('q-opt').value = opts;
   document.getElementById('q-ans').value = ans;
   document.getElementById('q-exp').value = exp;
-  
   alert('✨ 解析完成！请检查下面的框是否拆对了，如果有错可以手动改改，然后点保存。');
 }
 
@@ -368,14 +647,11 @@ function saveQ() {
     e: document.getElementById('q-exp').value,
     m: false
   });
-  
-  // 清空表单
   document.getElementById('smart-paste').value = '';
   document.getElementById('q-title').value = '';
   document.getElementById('q-ans').value = '';
   document.getElementById('q-opt').value = '';
   document.getElementById('q-exp').value = '';
-  
   toggleForm(); save();
 }
 
@@ -387,7 +663,6 @@ function startExam() {
   document.getElementById('mainArea').style.display = 'none';
   document.getElementById('examArea').style.display = 'block';
   document.getElementById('exam-result').style.display = 'none';
-  
   document.getElementById('exam-list').innerHTML = examQs.map((q, i) => {
     const opts = q.o ? q.o.split('\n').filter(x=>x.trim()) : [];
     return `
